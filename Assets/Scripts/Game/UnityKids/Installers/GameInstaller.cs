@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 using Utils;
 using Zenject;
@@ -10,6 +11,7 @@ namespace Game
         [SerializeField] private GameConfig _gameConfig;
         [SerializeField] private DragConfig _dragConfig;
         [SerializeField] private AnimationsConfig _animationsConfig;
+        [SerializeField] private MessagesConfig _messagesConfig;
         [SerializeField] private Canvas _canvas;
         [SerializeField] private ScrollRect _scrollRect;
         [SerializeField] private RectTransform _canvasTransform;
@@ -17,12 +19,13 @@ namespace Game
         [SerializeField] private RectTransform _cubesPanel;
         [SerializeField] private RectTransform _basement;
         [SerializeField] private RectTransform _pit;
+        [SerializeField] private TextMeshProUGUI _textField;
         [SerializeField] private Material _maskableMaterial;
         
         public override void InstallBindings()
         {
             BindGameInstance();
-            BindCubesFactory();
+            BindFactories();
             BindServices();
         }
 
@@ -33,7 +36,7 @@ namespace Game
                 .AsSingle();
         }
 
-        private void BindCubesFactory()
+        private void BindFactories()
         {
             Container
                 .Bind<ViewsFactory>()
@@ -44,6 +47,11 @@ namespace Game
                 .Bind<SpawningService>()
                 .AsSingle()
                 .WithArguments(_gameConfig);
+            
+            Container
+                .Bind<TowerContainerFactory>()
+                .AsSingle()
+                .WithArguments(_canvas, _gameArea);
         }
         
         private void BindServices()
@@ -77,11 +85,12 @@ namespace Game
             Container
                 .BindInterfacesAndSelfTo<InteractionService>()
                 .AsSingle()
-                .WithArguments(_animationsConfig);
+                .WithArguments(_animationsConfig, _messagesConfig);
             
             Container
                 .Bind<InteractionProxy>()
-                .AsSingle();
+                .AsSingle()
+                .WithArguments(_canvasTransform);
             
             Container
                 .BindInterfacesAndSelfTo<OverlappingService>()
@@ -97,6 +106,11 @@ namespace Game
                 .BindInterfacesAndSelfTo<PitService>()
                 .AsSingle()
                 .WithArguments(_animationsConfig, _pit, _canvas, _maskableMaterial);
+            
+            Container
+                .BindInterfacesAndSelfTo<MessageService>()
+                .AsSingle()
+                .WithArguments(_messagesConfig, _textField);
         }
         
         private void InstallPanelDraggingProvider(DiContainer subContainer)

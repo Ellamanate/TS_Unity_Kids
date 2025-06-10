@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using DG.Tweening.Core;
@@ -7,7 +8,7 @@ namespace Utils
 {
     public static class AsyncExtensions
     {
-        public static UniTask AsyncWaitForKill(this Tween tween, System.Threading.CancellationToken cancellationToken)
+        public static UniTask AsyncWaitForKill(this Tween tween, CancellationToken cancellationToken)
         {
             if (tween == null || !tween.active)
             {
@@ -38,6 +39,38 @@ namespace Utils
             });
 
             return tcs.Task;
+        }
+        
+        public static void CheckCanceled(this CancellationToken token)
+        {
+            if (token.IsCancellationRequested)
+            {
+                throw new OperationCanceledException();
+            }
+        }
+
+        public static CancellationTokenSource Refresh(this CancellationTokenSource token)
+        {
+            token?.CancelAndDispose();
+
+            return new CancellationTokenSource();
+        }
+
+        public static void CancelAndDispose(this CancellationTokenSource token)
+        {
+            if (token != null)
+            {
+                token.TryCancel();
+                token.Dispose();
+            }
+        }
+
+        public static void TryCancel(this CancellationTokenSource token)
+        {
+            if (token != null && !token.IsCancellationRequested)
+            {
+                token.Cancel(true);
+            }
         }
     }
 }

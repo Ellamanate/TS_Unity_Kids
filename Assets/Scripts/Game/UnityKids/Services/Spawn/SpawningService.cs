@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Utils;
 using Zenject;
 
@@ -35,8 +36,12 @@ namespace Game
         {
             var view = _factory.CreateView(color);
             _panelDraggingProvider.AddView(view);
+
+            view.OnDestroyEvent += DestroyAction;
             
             return view;
+            
+            void DestroyAction(CubeView cube) => Destroy(DestroyAction, cube);
         }
         
         public CubeView CreateWorldView(CubeView fromView)
@@ -44,7 +49,19 @@ namespace Game
             var view = _factory.CreateFrom(fromView);
             _worldDraggingProvider.AddView(view);
             
+            view.OnDestroyEvent += DestroyAction;
+            
             return view;
+            
+            void DestroyAction(CubeView cube) => Destroy(DestroyAction, cube);
+        }
+        
+        private void Destroy(Action<CubeView> action, CubeView view)
+        {
+            view.Dispose();
+            _worldDraggingProvider.RemoveView(view);
+            
+            view.OnDestroyEvent -= action;
         }
     }
 }

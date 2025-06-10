@@ -8,6 +8,7 @@ namespace Game
         private readonly TowerService _towerService;
         private readonly ViewsFactory _viewsFactory;
         private readonly SpawningService _spawningService;
+        private readonly RectTransform _canvasTransform;
 
         private CubeView _viewShadow;
         
@@ -15,12 +16,14 @@ namespace Game
             InteractionService interactionService,
             TowerService towerService,
             ViewsFactory viewsFactory,
-            SpawningService spawningService)
+            SpawningService spawningService,
+            RectTransform canvasTransform)
         {
             _interactionService = interactionService;
             _towerService = towerService;
             _viewsFactory = viewsFactory;
             _spawningService = spawningService;
+            _canvasTransform = canvasTransform;
         }
         
         public void OnBeginDrag(CubeView view)
@@ -28,6 +31,7 @@ namespace Game
             if (!_towerService.IsInTower(view))
             {
                 _viewShadow = _viewsFactory.CreateFrom(view);
+                _viewShadow.RectTransform.SetParent(_canvasTransform);
                 _viewShadow.RectTransform.SetSiblingIndex(-1);
             }
             else

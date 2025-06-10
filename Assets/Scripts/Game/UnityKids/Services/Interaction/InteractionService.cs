@@ -13,6 +13,8 @@ namespace Game
         private readonly TowerService _towerService;
         private readonly OverlappingService _overlappingService;
         private readonly PitService _pitService;
+        private readonly MessageService _messageService;
+        private readonly MessagesConfig _messagesConfig;
         private readonly AnimationsConfig _animationsConfig;
         private readonly CancellationTokenSource _tokenSource;
         
@@ -20,19 +22,22 @@ namespace Game
             TowerService towerService,
             OverlappingService overlappingService,
             PitService pitService,
+            MessageService messageService,
+            MessagesConfig messagesConfig,
             AnimationsConfig animationsConfig)
         {
             _towerService = towerService;
             _overlappingService = overlappingService;
             _pitService = pitService;
             _animationsConfig = animationsConfig;
+            _messagesConfig = messagesConfig;
+            _messageService = messageService;
             _tokenSource = new CancellationTokenSource();
         }
         
         public void Dispose()
         {
-            _tokenSource.Cancel();
-            _tokenSource.Dispose();
+            _tokenSource.CancelAndDispose();
         }
 
         public void OnBeginDrag(CubeView view)
@@ -40,6 +45,7 @@ namespace Game
             if (_towerService.IsInTower(view))
             {
                 _towerService.Remove(view);
+                _messageService.ShowMessage(_messagesConfig.RemoveTowerCubeKey);
             }
             
             view.RectTransform.SetSiblingIndex(-1);
@@ -58,22 +64,36 @@ namespace Game
         private void PlaceCube(CubeView view)
         {
             bool hasCubes = _towerService.HasCubes();
-
-            if (_towerService.CanAddLevel() 
-                && (!hasCubes && _overlappingService.IsOverlappingBasement(view.RectTransform)
-                || (hasCubes && _overlappingService.IsOverlappingTower(view.RectTransform))))
+            bool overlapTower = _overlappingService.IsOverlappingTower(view.RectTransform);
+            bool overlapBasement = _overlappingService.IsOverlappingBasement(view.RectTransform);
+            bool canAddLevel = _towerService.CanAddLevel();
+            
+            if ((!hasCubes && overlapBasement) || (hasCubes && overlapTower && canAddLevel))
             {
                 _towerService.AddLevel(view);
+                _messageService.ShowMessage(_messagesConfig.AddTowerCubeKey);
+            }
+            else if (overlapTower && !canAddLevel)
+            {
+                DestroyCube(view);
+                _messageService.ShowMessage(_messagesConfig.TowerFullKey);
             }
             else if (_overlappingService.IsOverlappingPit(view.RectTransform))
             {
                 _pitService.SetCube(view);
+                _messageService.ShowMessage(_messagesConfig.DropPitKey);
             }
             else
             {
-                view.Dispose();
-                _ = PlayDestroyAnimation(view, _tokenSource.Token);
+                DestroyCube(view);
+                _messageService.ShowMessage(_messagesConfig.DestroyCubeKey);
             }
+        }
+
+        private void DestroyCube(CubeView view)
+        {
+            view.Dispose();
+            _ = PlayDestroyAnimation(view, _tokenSource.Token);
         }
 
         private async UniTaskVoid PlayDestroyAnimation(CubeView view, CancellationToken cancellationToken)

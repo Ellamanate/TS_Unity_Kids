@@ -12,13 +12,15 @@ namespace Game
         IDragHandler,
         IEndDragHandler
     {
-        public event Action<CubeView> OnDisposed;
+        public event Action<CubeView> OnDestroyEvent;
+        public event Action<CubeView> OnDisposedEvent;
         public event Action<CubeView, PointerEventData> OnPointerDownEvent;
         public event Action<CubeView, PointerEventData> OnBeginDragEvent;
         public event Action<CubeView, PointerEventData> OnDragEvent;
         public event Action<CubeView, PointerEventData> OnEndDragEvent;
         
         [SerializeField] private Image _image;
+        [SerializeField] private Image _innerImage;
         
         [field: SerializeField] public RectTransform RectTransform { get; private set; }
         [field: SerializeField] public Color Color { get; private set; }
@@ -28,7 +30,12 @@ namespace Game
         public void Dispose()
         {
             _isDisposed = true;
-            OnDisposed?.Invoke(this);
+            OnDisposedEvent?.Invoke(this);
+        }
+
+        private void OnDestroy()
+        {
+            OnDestroyEvent?.Invoke(this);
         }
         
         public void SetColor(Color color)
@@ -40,6 +47,7 @@ namespace Game
         public void SetMaterial(Material material)
         {
             _image.material = material;
+            _innerImage.material = material;
         }
         
         public void OnPointerDown(PointerEventData eventData)

@@ -20,6 +20,7 @@ namespace Game
             public Vector3 TargetContainerPosition;
         }
         
+        private readonly TowerContainerFactory _containerFactory;
         private readonly AnimationsConfig _animationsConfig;
         private readonly Canvas _canvas;
         private readonly RectTransform _gameArea;
@@ -29,10 +30,12 @@ namespace Game
         private CancellationTokenSource _tokenSource;
         
         public TowerService(
+            TowerContainerFactory containerFactory,
             AnimationsConfig animationsConfig,
             Canvas canvas,
             RectTransform gameArea)
         {
+            _containerFactory = containerFactory;
             _animationsConfig = animationsConfig;
             _canvas = canvas;
             _gameArea = gameArea;
@@ -43,13 +46,11 @@ namespace Game
         
         public void Dispose()
         {
-            _tokenSource.Cancel();
-            _tokenSource.Dispose();
+            _tokenSource.CancelAndDispose();
 
             foreach (var level in _levels)
             {
-                level.TokenSource.Cancel();
-                level.TokenSource.Dispose();
+                level.TokenSource.CancelAndDispose();
             }
         }
 
@@ -89,12 +90,11 @@ namespace Game
         public void AddLevel(CubeView cube)
         {
             float cubeHeight = cube.RectTransform.sizeDelta.y * _canvas.scaleFactor;
-            var container = new GameObject("Container").AddComponent<RectTransform>();
-            container.SetParent(_gameArea, false);
-            container.sizeDelta = cube.RectTransform.sizeDelta;
-            container.position = HasCubes()
+            var position = HasCubes()
                 ? _levels.Last().TargetContainerPosition + new Vector3(0, cubeHeight, 0)
                 : cube.RectTransform.position;
+            
+            var container = _containerFactory.Create(cube.RectTransform.sizeDelta, position);
             cube.RectTransform.SetParent(container);
             
             var level = new TowerLevel
@@ -107,9 +107,11 @@ namespace Game
             
             if (HasCubes())
             {
+                float offsetX = cube.RectTransform.sizeDelta.x * _canvas.scaleFactor / 2f;
+                offsetX = UnityEngine.Random.Range(-offsetX, offsetX);
                 float bounceHeight = cubeHeight * _animationsConfig.BounceHeight;
                 var token = level.TokenSource.Token;
-                _ = PlayBounceAnimation(cube, bounceHeight, token);
+                _ = PlayBounceAnimation(cube, bounceHeight, offsetX, token);
             }
             
             _levels.Add(level);
@@ -122,14 +124,11 @@ namespace Game
             if (index >= 0)
             {
                 var targetLevel = _levels[index];
-                targetLevel.TokenSource.Cancel();
-                targetLevel.TokenSource.Dispose();
+                targetLevel.TokenSource.CancelAndDispose();
                 
                 _levels.RemoveAt(index);
                 
-                _tokenSource.Cancel();
-                _tokenSource.Dispose();
-                _tokenSource = new CancellationTokenSource();
+                _tokenSource = _tokenSource.Refresh();
                 var token = _tokenSource.Token;
                 
                 targetLevel.Cube.RectTransform.SetParent(_gameArea, true);
@@ -140,7 +139,10 @@ namespace Game
             }
         }
         
-        private async UniTaskVoid PlayFallAnimation(float cubeHeight, int index, CancellationToken cancellationToken)
+        private async UniTaskVoid PlayFallAnimation(
+            float cubeHeight,
+            int index,
+            CancellationToken cancellationToken)
         {
             var sequence = DOTween
                 .Sequence()
@@ -158,10 +160,14 @@ namespace Game
             await sequence.AsyncWaitForKill(cancellationToken: cancellationToken);
         }
 
-        private async UniTaskVoid PlayBounceAnimation(CubeView cube, float height, CancellationToken cancellationToken)
+        private async UniTaskVoid PlayBounceAnimation(
+            CubeView cube,
+            float height,
+            float offsetX,
+            CancellationToken cancellationToken)
         {
             var sequence = DOTween.Sequence()
-                .Join(cube.RectTransform.DOLocalMoveX(0, _animationsConfig.BounceDuration))
+                .Join(cube.RectTransform.DOLocalMoveX(offsetX, _animationsConfig.BounceDuration))
                 .Join(DOTween.Sequence()
                     .Join(cube.RectTransform.DOLocalMoveY(height, _animationsConfig.BounceDuration / 2f))
                     .Append(cube.RectTransform.DOLocalMoveY(0, _animationsConfig.BounceDuration / 2f)))

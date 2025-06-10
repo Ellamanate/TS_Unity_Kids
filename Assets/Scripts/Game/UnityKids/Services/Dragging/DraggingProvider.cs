@@ -24,7 +24,7 @@ namespace Game
         {
             foreach (var view in _createdViews)
             {
-                view.OnDisposed -= OnViewDisposed;
+                view.OnDisposedEvent -= OnViewDisposed;
                 view.OnPointerDownEvent -= OnPointerDown;
                 view.OnBeginDragEvent -= OnBeginDrag;
                 view.OnDragEvent -= OnDrag;
@@ -40,7 +40,7 @@ namespace Game
                 return;
             }
             
-            view.OnDisposed += OnViewDisposed;
+            view.OnDisposedEvent += OnViewDisposed;
             view.OnPointerDownEvent += OnPointerDown;
             view.OnBeginDragEvent += OnBeginDrag;
             view.OnDragEvent += OnDrag;
@@ -50,7 +50,7 @@ namespace Game
 
         public void RemoveView(CubeView view)
         {
-            view.OnDisposed -= OnViewDisposed;
+            view.OnDisposedEvent -= OnViewDisposed;
             view.OnPointerDownEvent -= OnPointerDown;
             view.OnBeginDragEvent -= OnBeginDrag;
             view.OnDragEvent -= OnDrag;
