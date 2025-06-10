@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Game
+namespace Utils
 {
     public abstract class StateMachine<TState> where TState : class, IState
     {

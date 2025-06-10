@@ -1,4 +1,4 @@
-namespace Game
+namespace Utils
 {
     public interface IEnteringState : IState
     {

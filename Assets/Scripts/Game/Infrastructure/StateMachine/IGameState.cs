@@ -1,3 +1,5 @@
+using Utils;
+
 namespace Game
 {
     public interface IGameState : IState

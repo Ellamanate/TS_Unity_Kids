@@ -1,4 +1,6 @@
-﻿namespace Game
+﻿using Utils;
+
+namespace Game
 {
     public class BootstrapState : IGameState, IEnteringState
     {

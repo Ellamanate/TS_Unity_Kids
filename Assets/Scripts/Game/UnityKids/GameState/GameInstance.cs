@@ -1,4 +1,3 @@
-using UnityEngine;
 using Zenject;
 
 namespace Game
@@ -6,10 +5,12 @@ namespace Game
     public class GameInstance : IInitializable
     {
         private readonly GameLoopState _gameLoopState;
+        private readonly ViewsFactory _factory;
 
-        public GameInstance(GameLoopState gameLoopState)
+        public GameInstance(GameLoopState gameLoopState, ViewsFactory factory)
         {
             _gameLoopState = gameLoopState;
+            _factory = factory;
         }
 
         public void Initialize()
@@ -19,7 +20,7 @@ namespace Game
 
         public void StartGame()
         {
-            Debug.Log("Starting Game");
+            _factory.CreateInitialViews();
         }
     }
 }
