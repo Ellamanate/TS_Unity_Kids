@@ -29,5 +29,17 @@ namespace Utils
 
             return true;
         }
+
+        public static bool IsInsideOval(this RectTransform target, RectTransform oval, Canvas canvas)
+        {
+            float a = oval.sizeDelta.x * canvas.scaleFactor / 2f;
+            float b = oval.sizeDelta.y * canvas.scaleFactor / 2f;
+
+            float dx = target.position.x - oval.position.x;
+            float dy = target.position.y - oval.position.y;
+
+            float value = (dx * dx) / (a * a) + (dy * dy) / (b * b);
+            return value <= 1f;
+        }
     }
 }

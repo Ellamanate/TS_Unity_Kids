@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3efb60e79c8246878f1422f2c61679bc, type: 3}
+  m_Name: AnimationsConfig
+  m_EditorClassIdentifier: 
+  <BounceDuration>k__BackingField: 0.8
+  <BounceHeight>k__BackingField: 0.75
+  <DestroyDuration>k__BackingField: 0.5
+  <TowerFallDuration>k__BackingField: 0.5
+  <PitFallDuration>k__BackingField: 1
+  <PitOffsetUp>k__BackingField: 1
+  <PitOffsetDown>k__BackingField: 1.5
+  <BounceEase>k__BackingField: 15
+  <DestroyEase>k__BackingField: 27
+  <TowerFallEase>k__BackingField: 3
+  <PitFallEase>k__BackingField: 3

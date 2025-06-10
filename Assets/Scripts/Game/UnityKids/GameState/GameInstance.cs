@@ -5,12 +5,12 @@ namespace Game
     public class GameInstance : IInitializable
     {
         private readonly GameLoopState _gameLoopState;
-        private readonly ViewsFactory _factory;
+        private readonly SpawningService _spawningService;
 
-        public GameInstance(GameLoopState gameLoopState, ViewsFactory factory)
+        public GameInstance(GameLoopState gameLoopState, SpawningService spawningService)
         {
             _gameLoopState = gameLoopState;
-            _factory = factory;
+            _spawningService = spawningService;
         }
 
         public void Initialize()
@@ -20,7 +20,7 @@ namespace Game
 
         public void StartGame()
         {
-            _factory.CreateInitialViews();
+            _spawningService.CreateInitialViews();
         }
     }
 }

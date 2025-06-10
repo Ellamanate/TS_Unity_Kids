@@ -5,35 +5,73 @@ using UnityEngine.UI;
 
 namespace Game
 {
-    public class CubeView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class CubeView : MonoBehaviour,
+        IDisposable,
+        IPointerDownHandler,
+        IBeginDragHandler,
+        IDragHandler,
+        IEndDragHandler
     {
+        public event Action<CubeView> OnDisposed;
+        public event Action<CubeView, PointerEventData> OnPointerDownEvent;
         public event Action<CubeView, PointerEventData> OnBeginDragEvent;
         public event Action<CubeView, PointerEventData> OnDragEvent;
         public event Action<CubeView, PointerEventData> OnEndDragEvent;
-
+        
+        [SerializeField] private Image _image;
+        
         [field: SerializeField] public RectTransform RectTransform { get; private set; }
-        [field: SerializeField] public Image Image { get; private set; }
         [field: SerializeField] public Color Color { get; private set; }
+
+        private bool _isDisposed;
+
+        public void Dispose()
+        {
+            _isDisposed = true;
+            OnDisposed?.Invoke(this);
+        }
         
         public void SetColor(Color color)
         {
             Color = color;
-            Image.color = color;
+            _image.color = color;
+        }
+        
+        public void SetMaterial(Material material)
+        {
+            _image.material = material;
+        }
+        
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            if (!_isDisposed)
+            {
+                OnPointerDownEvent?.Invoke(this, eventData);
+            }
         }
         
         public void OnBeginDrag(PointerEventData eventData)
         {
-            OnBeginDragEvent?.Invoke(this, eventData);
+            if (!_isDisposed)
+            {
+                OnBeginDragEvent?.Invoke(this, eventData);
+            }
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            OnDragEvent?.Invoke(this, eventData);
+            if (!_isDisposed)
+            {
+                OnDragEvent?.Invoke(this, eventData);
+            }
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            OnEndDragEvent?.Invoke(this, eventData);
+            if (!_isDisposed)
+            {
+                OnEndDragEvent?.Invoke(this, eventData);
+            }
         }
     }
 }

@@ -89,5 +89,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <RectTransform>k__BackingField: {fileID: 3456158927212656984}
-  <Image>k__BackingField: {fileID: 9117038673616226351}
   <Color>k__BackingField: {r: 0, g: 0, b: 0, a: 0}
+  _image: {fileID: 9117038673616226351}
